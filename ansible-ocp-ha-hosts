@@ -1,0 +1,74 @@
+# Create an OSEv3 group that contains the masters and nodes groups
+[OSEv3:children]
+masters
+nodes
+etcd
+nfs
+
+# Set variables common for all OSEv3 hosts
+[OSEv3:vars]
+ansible_ssh_user=mglantz
+ansible_become=yes
+openshift_install_examples=true
+deployment_type=openshift-enterprise
+docker_udev_workaround=True
+openshift_use_dnsmasq=false
+openshift_master_default_subdomain=13.74.162.85.xip.io
+openshift_override_hostname_check=true
+osm_use_cockpit=true
+os_sdn_network_plugin_name='redhat/openshift-ovs-multitenant'
+
+openshift_master_cluster_method=native
+openshift_master_cluster_hostname=ocpatestmaster.northeurope.cloudapp.azure.com
+openshift_master_cluster_public_hostname=ocpatestmaster.northeurope.cloudapp.azure.com
+#openshift_master_cluster_public_vip=40.69.68.163
+
+# Enable HTPasswdPasswordIdentityProvider
+openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
+
+# Configure persistent storage via nfs server on master
+openshift_hosted_registry_storage_kind=nfs
+openshift_hosted_registry_storage_access_modes=['ReadWriteMany']
+openshift_hosted_registry_storage_host=ocpm-0.kt3ctolshicenermavwm10pgye.fx.internal.cloudapp.net
+openshift_hosted_registry_storage_nfs_directory=/exports
+openshift_hosted_registry_storage_volume_name=registry
+openshift_hosted_registry_storage_volume_size=5Gi
+
+# Setup metrics
+openshift_hosted_metrics_deploy=true
+# As of this writing, there's a bug in the metrics deployment.
+# You'll see the metrics failing to deploy 59 times, it will, though, succeed the 60'th time.
+openshift_hosted_metrics_storage_kind=nfs
+openshift_hosted_metrics_storage_access_modes=['ReadWriteOnce']
+openshift_hosted_metrics_storage_host=ocpm-0.kt3ctolshicenermavwm10pgye.fx.internal.cloudapp.net
+openshift_hosted_metrics_storage_nfs_directory=/exports
+openshift_hosted_metrics_storage_volume_name=metrics
+openshift_hosted_metrics_storage_volume_size=10Gi
+openshift_hosted_metrics_public_url=https://metrics.13.74.162.85.xip.io/hawkular/metrics
+
+# Setup logging
+openshift_hosted_logging_deploy=true
+openshift_hosted_logging_storage_kind=nfs
+openshift_hosted_logging_storage_access_modes=['ReadWriteOnce']
+openshift_hosted_logging_storage_host=ocpm-0.kt3ctolshicenermavwm10pgye.fx.internal.cloudapp.net
+openshift_hosted_logging_storage_nfs_directory=/exports
+openshift_hosted_logging_storage_volume_name=logging
+openshift_hosted_logging_storage_volume_size=10Gi
+openshift_master_logging_public_url=https://kibana.13.74.162.85.xip.io
+
+# host group for masters
+[masters]
+ocpm-[0:2].kt3ctolshicenermavwm10pgye.fx.internal.cloudapp.net
+
+# host group for etcd
+[etcd]
+ocpm-[0:2].kt3ctolshicenermavwm10pgye.fx.internal.cloudapp.net
+
+[nfs]
+ocpm-0.kt3ctolshicenermavwm10pgye.fx.internal.cloudapp.net
+
+# host group for nodes
+[nodes]
+ocpm-[0:2].kt3ctolshicenermavwm10pgye.fx.internal.cloudapp.net openshift_node_labels="{'region': 'master', 'zone': 'default'}"
+ocpi-[0:2].kt3ctolshicenermavwm10pgye.fx.internal.cloudapp.net openshift_node_labels="{'region': 'infra', 'zone': 'default'}"
+ocpn-[0:1].kt3ctolshicenermavwm10pgye.fx.internal.cloudapp.net openshift_node_labels="{'region': 'nodes', 'zone': 'default'}"
