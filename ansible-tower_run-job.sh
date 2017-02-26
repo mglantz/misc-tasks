@@ -12,6 +12,11 @@ if [ -f call.out ]; then
 	rm -f call.out
 fi
 
+if [ -f job.status ]; then
+	rm -f job.status
+fi
+
+
 ANSIBLE_SERVER=$1
 JOB_TEMPLATE_ID=$2
 
