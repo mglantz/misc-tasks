@@ -1,11 +1,27 @@
 #!/bin/bash
 # Ansible Tower, launch job and get stdout back
+# Run on Ansible Tower host
 
 if [ -f call.out ]; then
 	rm -f call.out
 fi
 
-curl -s -f -k -H 'Content-Type: application/json' -XPOST --user devops:redhat123 https://localhost/api/v1/job_templates/7/launch/ -o call.out
+JOB_TEMPLATE_ID=$1
+ANSIBLE_SERVER=$2
+
+if [ "$ANSIBLE_SERVER" == "" ]
+then 
+	echo "Usage: $0 [ANSIBLE_SERVER_FQDN] [JOB_TEMPLATE_ID]"
+	exit 1
+fi
+
+if ! echo $JOB_TEMPLATE_ID|grep [0-9] >/dev/null
+then
+	echo "Usage: $0 [ANSIBLE_SERVER_FQDN] [JOB_TEMPLATE_ID]"
+	exit 1
+fi
+
+curl -s -f -k -H 'Content-Type: application/json' -XPOST --user devops:redhat123 https://localhost/api/v1/job_templates/$JOB_TEMPLATE_ID/launch/ -o call.out
 
 JOB_ID=$(cat call.out|cut -d\" -f5|sed -e 's/://g' -e 's/,//g')
 if echo $JOB_ID|grep [0-9] >/dev/null
