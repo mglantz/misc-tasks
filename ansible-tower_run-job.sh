@@ -1,6 +1,12 @@
 #!/bin/bash
 # Ansible Tower, launch job and get stdout back
 # Run on Ansible Tower host
+#
+# Edit below section
+USER=
+PASS=
+# Remove below when you've added user and password
+exit 0
 
 if [ -f call.out ]; then
 	rm -f call.out
