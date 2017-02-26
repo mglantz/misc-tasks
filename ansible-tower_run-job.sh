@@ -27,7 +27,7 @@ then
 	exit 1
 fi
 
-curl -s -f -k -H 'Content-Type: application/json' -XPOST --user devops:redhat123 https://localhost/api/v1/job_templates/$JOB_TEMPLATE_ID/launch/ -o call.out
+curl -s -f -k -H 'Content-Type: application/json' -XPOST --user $USER:$PASS https://localhost/api/v1/job_templates/$JOB_TEMPLATE_ID/launch/ -o call.out
 
 JOB_ID=$(cat call.out|cut -d\" -f5|sed -e 's/://g' -e 's/,//g')
 if echo $JOB_ID|grep [0-9] >/dev/null
@@ -40,7 +40,7 @@ fi
 
 while true
 do
-	curl -s -f -k -H 'Content-Type: application/json' -XGET --user devops:redhat123 https://localhost/api/v1/jobs/$JOB_ID/ -o job.status
+	curl -s -f -k -H 'Content-Type: application/json' -XGET --user $USER:$PASS https://localhost/api/v1/jobs/$JOB_ID/ -o job.status
 
 	if cat job.status|grep "ok=2    changed=0    unreachable=0    failed=0" >/dev/null
 	then
