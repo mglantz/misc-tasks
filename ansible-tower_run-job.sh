@@ -6,8 +6,8 @@ if [ -f call.out ]; then
 	rm -f call.out
 fi
 
-JOB_TEMPLATE_ID=$1
-ANSIBLE_SERVER=$2
+ANSIBLE_SERVER=$1
+JOB_TEMPLATE_ID=$2
 
 if [ "$ANSIBLE_SERVER" == "" ]
 then 
