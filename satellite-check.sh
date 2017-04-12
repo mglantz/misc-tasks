@@ -2,6 +2,14 @@
 # Sloppy Satellite 6.2 prereq checks
 # Magnus Glantz, sudo@redhat.com, 2017
 
+if [ "$(whoami)" != "root" ]; then
+	echo "You need to be root to run this script."
+else
+	rpm -q nmap-ncat >/dev/null
+	if [ "$?" -ne
+	yum -y install nmap-ncat -y
+fi
+
 if echo $1|grep -i help >/dev/null; then
 	echo "Usage ($0):"
 	echo "To do general testing of prereqs, just run: $0."
