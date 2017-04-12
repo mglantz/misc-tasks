@@ -6,8 +6,11 @@ if [ "$(whoami)" != "root" ]; then
 	echo "You need to be root to run this script."
 else
 	rpm -q nmap-ncat >/dev/null
-	if [ "$?" -ne
-	yum -y install nmap-ncat -y
+	if [ "$?" -eq 0 ]; then
+		break
+	else
+		yum -y install nmap-ncat -y
+	fi
 fi
 
 if echo $1|grep -i help >/dev/null; then
