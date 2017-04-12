@@ -9,7 +9,7 @@ else
 	if [ "$?" -eq 0 ]; then
 		break
 	else
-		yum -y install nmap-ncat -y
+		yum -y install nmap-ncat
 	fi
 fi
 
