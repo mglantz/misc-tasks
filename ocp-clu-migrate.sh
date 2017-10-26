@@ -3,24 +3,30 @@
 # Demo of cluster-to-cluster migration of simple non-persistent app, including state of number of pods.
 # sudo@redhat.com, 2017
 
-# Cluster you migrate from
+## Cluster you migrate from
+# URL
 CLU1=
+# TOKEN to user (oc whoami -t)
 CLU1_TOKEN=
+# Cluster subdomain on which apps get's created 
 CLU1_SUBDOMAIN=
 
-# Cluster you migrate to
+## Cluster you migrate to
+# URL
 CLU2=
+# TOKEN to user (oc whoami -t)
 CLU2_TOKEN=
+# Cluster subdomain on which apps get's created 
 CLU2_SUBDOMAIN=
 
 PROJECT=$1
 
 rm -f *yaml
 
-echo "Logging in to $1"
+echo "Logging in to $CLU1"
 oc login $CLU1 --token=$CLU1_TOKEN --insecure-skip-tls-verify=false >/dev/null 2>&1
-echo "Getting $2 data."
-oc project $2 >/dev/null 2>&1
+echo "Getting $PROJECT data."
+oc project $PROJECT >/dev/null 2>&1
 
 # Fetch all stuff, put formated data in files for processes
 oc get all >project.tmp 
@@ -53,9 +59,10 @@ for item in $(cat is.tmp); do
 done
 
 echo "Migrating configuration to: $3"
+echo "Logging in to $CLU2"
 oc login $CLU2 --token=$CLU2_TOKEN --insecure-skip-tls-verify=false >/dev/null 2>&1
-echo "Creating project $2"
-oc new-project $2 >/dev/null 2>&1
+echo "Creating project $PROJECT"
+oc new-project $PROJECT >/dev/null 2>&1
 
 echo "Creating image stream"
 for item in $(ls is-*.yaml); do
@@ -86,6 +93,7 @@ for item in $(ls route*.yaml); do
 done
 
 # Start build
+echo "Starting build of app on new cluster"
 oc start-build $(oc get bc|grep -v NAME|awk '{ print $1 }')
 
 # Cleanup
