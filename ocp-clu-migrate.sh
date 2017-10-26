@@ -15,6 +15,8 @@ CLU2_SUBDOMAIN=
 
 PROJECT=$1
 
+rm -f *yaml
+
 echo "Logging in to $1"
 oc login $CLU1 --token=$CLU1_TOKEN --insecure-skip-tls-verify=false >/dev/null 2>&1
 echo "Getting $2 data."
