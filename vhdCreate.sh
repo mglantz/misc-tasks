@@ -6,6 +6,8 @@
 GROUP=$1
 # VM image file name
 FILE=$2
+# VM name on Azure
+IMAGENAME=$3
 
 # Valid values:
 # centralus,eastasia,southeastasia,eastus,eastus2,westus,westus2,northcentralus,southcentralus
@@ -26,7 +28,7 @@ ACCOUNT="${GROUP}storageaccount"
 KEY=$(grep key1 $GROUP.keys|awk '{ print $3 }')
 
 # Create storage container
-azure storage container create -p Off -a $ACCOUNT -k $KEY --container rhel74
+azure storage container create -p Off -a $ACCOUNT -k $KEY --container $IMAGENAME
 
 # Upload VHD image to blob
-azure storage blob upload -t block -b rhel74 -a $ACCOUNT -k $KEY --container rhel74 -f $FILE
+azure storage blob upload -t block -b $IMAGENAME -a $ACCOUNT -k $KEY --container $IMAGENAME -f $FILE
