@@ -28,7 +28,7 @@ ACCOUNT="${GROUP}storageaccount"
 KEY=$(grep key1 $GROUP.keys|awk '{ print $3 }')
 
 # Create storage container
-azure storage container create -p Off -a $ACCOUNT -k $KEY --container $IMAGENAME
+azure storage container create -p Off -a $ACCOUNT -k $KEY --container vms
 
 # Upload VHD image to blob
 azure storage blob upload -t block -b $IMAGENAME -a $ACCOUNT -k $KEY --container $IMAGENAME -f $FILE
