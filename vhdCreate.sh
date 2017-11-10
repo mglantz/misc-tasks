@@ -62,7 +62,7 @@ if echo $WHAT2DO|grep -i upload >/dev/null; then
 
 elif echo $WHAT2DO|grep -i deploy >/dev/null; then
 	az disk create --resource-group $GROUP --name ${VMNAME}ManagedDisk --source https://$ACCOUNT.blob.core.windows.net/vhds/$IMAGENAME
-	az vm create -g $GROUP -l $LOCATION -n $VMNAME --attach-os-disk ${VMNAME}ManagedDisk --os-type linux --admin-username deploy --ssh-key-value ~/.ssh/id_rsa.pub
+	az vm create -g $GROUP -l $LOCATION -n $VMNAME --attach-os-disk ${VMNAME}ManagedDisk --os-type linux --admin-username deploy --generate-ssh-keys
   	IP_ADDRESS=$(az vm list-ip-addresses -g $GROUP -n $VMNAME --query "[0].virtualMachine.network.publicIpAddresses[0].ipAddress" -o tsv)
 	echo "If your image works, you should be able to connect using: ssh deploy@$IP_ADDRESS"
 fi
