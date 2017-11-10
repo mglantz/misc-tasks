@@ -6,8 +6,10 @@
 GROUP=$1
 # VM image file name
 FILE=$2
+# Storage account name
+ACCOUNT=$3
 # VM name on Azure. Should be xyz.vhd
-IMAGENAME=$3
+IMAGENAME=$4
 
 # Valid values:
 # centralus,eastasia,southeastasia,eastus,eastus2,westus,westus2,northcentralus,southcentralus
