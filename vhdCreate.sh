@@ -6,7 +6,7 @@
 GROUP=$1
 # VM image file name
 FILE=$2
-# VM name on Azure
+# VM name on Azure. Should be xyz.vhd
 IMAGENAME=$3
 
 # Valid values:
@@ -15,20 +15,29 @@ IMAGENAME=$3
 # westindia,southindia,centralindia,canadacentral,canadaeast,uksouth,ukwest,koreacentral,koreasouth
 LOCATION=northeurope
 
-# Create Azure Resource Group
-azure group create $GROUP $LOCATION
+# Create a resource group
+az group create -n $GROUP -l northeurope
 
-# Create Storage account
-azure storage account create --sku-name LRS --kind BlobStorage --access-tier Hot -l $LOCATION -g $GROUP ${GROUP}storageaccount
+# Create the storage account to upload the vhd
+az storage account create -g $GROUP -n $ACCOUNT -l northeurope --sku PREMIUM_LRS
 
-# Fetch account key
-azure storage account keys list -g $GROUP ${GROUP}storageaccount >$GROUP.keys
+# Get a storage key for the storage account
+STORAGE_KEY=$(az storage account keys list -g $GROUP -n $ACCOUNT --query "[?keyName=='key1'] | [0].value" -o tsv)
 
-ACCOUNT="${GROUP}storageaccount"
-KEY=$(grep key1 $GROUP.keys|awk '{ print $3 }')
+# Create the container for the vhd
+az storage container create -n vhds --account-name $ACCOUNT --account-key ${STORAGE_KEY}
 
-# Create storage container
-azure storage container create -p Off -a $ACCOUNT -k $KEY --container vms
+# Upload the vhd to a blob
+az storage blob upload -c vhds -f $FILE -n $IMAGENAME --account-name $ACCOUNT --account-key ${STORAGE_KEY}
 
-# Upload VHD image to blob
-azure storage blob upload -t block -b $IMAGENAME -a $ACCOUNT -k $KEY --container $IMAGENAME -f $FILE
+read -p "Try to deploy VM from image? (y/n)" ANSWER
+
+if echo $ANSWER|grep -i "y" >/dev/null; then
+  az disk create --resource-group $GROUP --name myManagedDisk --source https://$ACCOUNT.blob.core.windows.net/vhds/$IMAGENAME.vhd
+  az vm create -g $GROUP -l northeurope -n custom-vm --attach-os-disk myManagedDisk --os-type linux --admin-username deploy --generate-ssh-keys
+  az vm user update --resource-group $GROUP -n custom-vm -u deploy --ssh-key-value "$(< ~/.ssh/id_rsa.pub)"
+  IP_ADDRESS=$(az vm list-ip-addresses -g $GROUP -n custom-vm --query "[0].virtualMachine.network.publicIpAddresses[0].ipAddress" -o tsv)
+  echo "You can now connect using 'ssh deploy@${IP_ADDRESS}'"
+else
+  echo "Done. Blob URL is: https://$ACCOUNT.blob.core.windows.net/vhds/$IMAGENAME.vhd"
+fi
