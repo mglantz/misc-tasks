@@ -6,10 +6,10 @@ if echo $1|grep -i help >/dev/null; then
 	echo "Usage: $0:"
 	echo "Attention: storageaccount name have to be lower case."
 	echo
-	echo "To upload a VM image: $0 upload resourceGroup localVMfile storageAccountName azureVMname.vhd"
+	echo "To upload a VM image: $0 upload resourceGroup localVMfile storageaccountname azureVMname.vhd"
 	echo "Example: $0 upload myResourceGroup /path/to/custom-vm.vhd mystorageaccount customVm.vhd"
 	echo
-	echo "To deploy VM image: $0 deploy resourceGroup nameOfVM storageAccountName azureVMname.vhd"
+	echo "To deploy VM image: $0 deploy resourceGroup nameOfVM storageaccountname azureVMname.vhd"
 	echo "Example: $0 deploy myResourceGroup myCustomVM1 mystorageaccount customVm.vhd"
 fi
 
