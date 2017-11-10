@@ -35,10 +35,11 @@ az storage blob upload -c vhds -f $FILE -n $IMAGENAME --account-name $ACCOUNT --
 read -p "Try to deploy VM from image? (y/n)" ANSWER
 
 if echo $ANSWER|grep -i "y" >/dev/null; then
-  az disk create --resource-group $GROUP --name myManagedDisk --source https://$ACCOUNT.blob.core.windows.net/vhds/$IMAGENAME.vhd
-  az vm create -g $GROUP -l northeurope -n custom-vm --attach-os-disk myManagedDisk --os-type linux --admin-username deploy --generate-ssh-keys
-  az vm user update --resource-group $GROUP -n custom-vm -u deploy --ssh-key-value "$(< ~/.ssh/id_rsa.pub)"
-  IP_ADDRESS=$(az vm list-ip-addresses -g $GROUP -n custom-vm --query "[0].virtualMachine.network.publicIpAddresses[0].ipAddress" -o tsv)
+  read -p "Enter name of virtual machine: " VMNAME
+  az disk create --resource-group $GROUP --name ${VMNAME}ManagedDisk --source https://$ACCOUNT.blob.core.windows.net/vhds/$IMAGENAME.vhd
+  az vm create -g $GROUP -l $LOCATION -n $VMNAME --attach-os-disk ${VMNAME}ManagedDisk --os-type linux --admin-username deploy --generate-ssh-keys
+  az vm user update --resource-group $GROUP -n $VMNAME -u deploy --ssh-key-value "$(< ~/.ssh/id_rsa.pub)"
+  IP_ADDRESS=$(az vm list-ip-addresses -g $GROUP -n $VMNAME --query "[0].virtualMachine.network.publicIpAddresses[0].ipAddress" -o tsv)
   echo "You can now connect using 'ssh deploy@${IP_ADDRESS}'"
 else
   echo "Done. Blob URL is: https://$ACCOUNT.blob.core.windows.net/vhds/$IMAGENAME.vhd"
