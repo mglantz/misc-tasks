@@ -58,7 +58,7 @@ if echo $WHAT2DO|grep -i upload >/dev/null; then
 	az storage blob upload -c vhds -f $FILE -n $IMAGENAME --account-name $ACCOUNT --account-key ${STORAGE_KEY}
 	
 	# Print blob URL
-	echo "Done. Blob URL is: https://$ACCOUNT.blob.core.windows.net/vhds/$IMAGENAME.vhd"
+	echo "Done. Blob URL is: https://$ACCOUNT.blob.core.windows.net/vhds/$IMAGENAME"
 
 elif echo $WHAT2DO|grep -i deploy >/dev/null; then
 	az disk create --resource-group $GROUP --name ${VMNAME}ManagedDisk --source https://$ACCOUNT.blob.core.windows.net/vhds/$IMAGENAME
