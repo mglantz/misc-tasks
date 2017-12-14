@@ -5,6 +5,8 @@
 # People with zero knowledge about Ansible Tower can review playbooks before they are made available in Tower.
 #
 # If you have tower-cli installed and configured on your Jenkins server for your jenkins user, this works.
+# Install tower-cli with: pip install ansible-tower-cli
+# Configure Ansible Tower user/password/server with: tower-cli config
 #
 
 # Refresh the project in Tower which is connected to the git repo, where the playbooks reside.
