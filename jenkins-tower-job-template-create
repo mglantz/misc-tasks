@@ -1,0 +1,41 @@
+# This is a demo of a Jenkins pipeline which will automatically detect if something new was merged to a repo and then
+# create a standard job_template out of that after having done a simple smoketest.
+# This is neat, as it allows someones workplace to become a version handling system, instead of Ansible Tower.
+# People with zero knowledge about Tower and review playbooks before they are made available in Tower.
+#
+# If you have tower-cli installed and configured on your Jenkins server for your jenkins user, this works.
+#
+
+# Refresh the project in Tower which is connected to the git repo, where the playbooks reside.
+echo "Refreshing project in Ansible Tower."
+tower-cli project update -n "Operating System Department" --monitor
+
+# A list of all the playbooks in the repo
+TEMPLATES=$(ls|grep yml|cut -d'.' -f1)
+
+# Loop through all the playbooks in the repo
+for item in ${TEMPLATES[@]}; do
+
+  # Check and see if we've already created a job_template for the playbook in question
+	if tower-cli job_template list|grep "Demo - $item" >/dev/null; then
+    	echo "Found job_template for: $item"
+  # No job_template created, so let's do that    
+  else
+      	echo "No job_template found for: $item."
+        echo "Creating job_template: Demo - $item"
+        tower-cli job_template create --name "Demo - $item check" --description "Created by Jenkins: $(date)" --job-type check --inventory Hostnetwork --project "Operating System Department" --playbook "$item.yml" --credential "Required access on hostnet"
+        echo "Launching job from template"
+        tower-cli job launch --job-template "Demo - $item check" --monitor >$item.output
+        echo "Output from run:"
+        cat $item.output
+        UNREACHABLE=$(cat $item.output|grep unreachable|awk '{ print $5 }'|cut -d= -f2)
+        FAILED=$(cat $item.output|grep unreachable|awk '{ print $5 }'|cut -d= -f2)
+        if [ "$UNREACHABLE" -eq 0 ]; then
+        	if [ "$FAILED" -eq 0 ]; then
+            	echo "Smoke test for Demo - $item completed successful. Creating template."
+            	tower-cli job_template delete --name "Demo - $item check"
+            	tower-cli job_template create --name "Demo - $item" --description "Created by Jenkins: $(date)" --job-type run --inventory Hostnetwork --project "Operating System Department" --playbook "$item.yml" --credential "Required access on hostnet"
+            fi
+        fi
+    fi
+done
