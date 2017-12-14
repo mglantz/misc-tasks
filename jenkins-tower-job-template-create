@@ -1,7 +1,8 @@
-# This is a demo of a Jenkins pipeline which will automatically detect if something new was merged to a repo and then
+# This is a demo of a Jenkins pipeline which will automatically detect if a new playbook was merged to a repo and then
 # create a standard job_template out of that after having done a simple smoketest.
-# This is neat, as it allows someones workplace to become a version handling system, instead of Ansible Tower.
-# People with zero knowledge about Tower and review playbooks before they are made available in Tower.
+#
+# This is neat, as it allows someones workplace to become a version handling system like GitHub, instead of Ansible Tower.
+# People with zero knowledge about Ansible Tower can review playbooks before they are made available in Tower.
 #
 # If you have tower-cli installed and configured on your Jenkins server for your jenkins user, this works.
 #
