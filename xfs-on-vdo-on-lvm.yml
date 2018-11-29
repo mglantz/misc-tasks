@@ -22,7 +22,7 @@
       with_items:
         - "{{ raw_devices }}"
 
-    - name: Create volume group with prepped disks
+    - name: Create physical volumes and a volume group with our formatted disks
       lvg:
         vg: vdotestvol
         pvs: "{{ raw_devices[0] }}1,{{ raw_devices[1] }}1"
