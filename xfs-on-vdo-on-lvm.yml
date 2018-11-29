@@ -1,0 +1,61 @@
+- name: Setup VDO
+  hosts: all
+  vars:
+    raw_devices:
+      - "/dev/sdb"
+      - "/dev/sdc"
+    vg_size: "9g"
+    vdo_device: "/dev/mapper/vdotestvol-vdotestlv"
+    vdo_size: "50g"
+    vdo_device_name: "vdotestdevice"
+  tasks:
+    - name: 
+      parted:
+        device: "{{ item }}"
+        part_type: primary
+        flags: [ lvm ]
+        state: present
+        number: 1
+        part_start: 0%
+        part_end: 100%
+      with_items:
+        - "{{ raw_devices }}"
+
+    - name: Create volume group with prepped disks
+      lvg:
+        vg: vdotestvol
+        pvs: "{{ raw_devices[0] }}1,{{ raw_devices[1] }}1"
+        state: present
+      
+    - name: Create a logical volume for the VDO device
+      lvol:
+        vg: vdotestvol
+        lv: vdotestlv
+        size: "{{ vg_size }}"
+        state: present
+
+    - name: Create VDO device on logical volume
+      vdo:
+        name: "{{ vdo_device_name }}"
+        state: present
+        device: "{{ vdo_device }}"
+        logicalsize: "{{ vdo_size }}"
+        writepolicy: async
+
+
+    - name: Create XFS filesystem on VDO device
+      filesystem:
+        fstype: xfs
+        dev: "/dev/mapper/{{ vdo_device_name }}"
+
+    - name: Ensure directory for XFS filesystem is in place
+      file:
+        path: "/{{ vdo_device_name }}"
+        state: directory
+
+    - name: Mount XFS filesystem
+      mount:
+        path: "/{{ vdo_device_name}}"
+        src: "/dev/mapper/{{ vdo_device_name }}"
+        fstype: xfs
+        state: mounted
