@@ -8,6 +8,7 @@
     vdo_device: "/dev/mapper/vdotestvol-vdotestlv"
     vdo_size: "50g"
     vdo_device_name: "vdotestdevice"
+    vdo_write_policy: "async"
   tasks:
     - name: 
       parted:
@@ -40,18 +41,13 @@
         state: present
         device: "{{ vdo_device }}"
         logicalsize: "{{ vdo_size }}"
-        writepolicy: async
+        writepolicy: "{{ vdo_write_policy }}"
 
 
     - name: Create XFS filesystem on VDO device
       filesystem:
         fstype: xfs
         dev: "/dev/mapper/{{ vdo_device_name }}"
-
-    - name: Ensure directory for XFS filesystem is in place
-      file:
-        path: "/{{ vdo_device_name }}"
-        state: directory
 
     - name: Mount XFS filesystem
       mount:
