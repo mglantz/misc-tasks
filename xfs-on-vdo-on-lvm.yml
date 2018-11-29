@@ -10,7 +10,7 @@
     vdo_device_name: "vdotestdevice"
     vdo_write_policy: "async"
   tasks:
-    - name: 
+    - name: Partition disks with LVM (8e) type
       parted:
         device: "{{ item }}"
         part_type: primary
