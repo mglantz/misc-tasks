@@ -12,7 +12,6 @@
       parted:
         device: "{{ item }}"
         part_type: primary
-        flags: [ linux ]
         state: present
         number: 1
         part_start: 0%
