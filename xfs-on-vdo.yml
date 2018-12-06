@@ -1,4 +1,4 @@
-- name: Setup VDO
+- name: Setup XFS filesystem on VDO directly on a physical partition
   hosts: all
   vars:
     raw_devices:
@@ -8,7 +8,7 @@
     vdo_device_name: "vdotestdevice"
     vdo_write_policy: "async"
   tasks:
-    - name: Partition disks with LVM (8e) type
+    - name: Partition disks with linux type set
       parted:
         device: "{{ item }}"
         part_type: primary
@@ -19,7 +19,7 @@
       with_items:
         - "{{ raw_devices }}"
 
-    - name: Create VDO device on logical volume
+    - name: Create VDO device on partition
       vdo:
         name: "{{ vdo_device_name }}"
         state: present
