@@ -1,0 +1,49 @@
+#!/bin/bash
+# Power tuning for Lenovo L580, sudo@redhat.com, 2019
+
+if whoami|grep "root" >/dev/null; then
+	if echo $1|grep -i on >/dev/null; then
+		echo "Enabling power tuning."
+		echo '1500' > '/proc/sys/vm/dirty_writeback_centisecs'
+		echo '0' > '/proc/sys/kernel/nmi_watchdog'
+		echo 'auto' > '/sys/bus/i2c/devices/i2c-0/device/power/control'
+		echo 'auto' > '/sys/bus/pci/devices/0000:00:1f.0/power/control'
+		echo 'auto' > '/sys/bus/pci/devices/0000:00:14.0/power/control'
+		echo 'auto' > '/sys/bus/pci/devices/0000:00:04.0/power/control'
+		echo 'auto' > '/sys/bus/pci/devices/0000:00:1f.6/power/control'
+		echo 'auto' > '/sys/bus/pci/devices/0000:40:00.0/power/control'
+		echo 'auto' > '/sys/bus/pci/devices/0000:00:00.0/power/control'
+		echo 'auto' > '/sys/bus/pci/devices/0000:00:1f.3/power/control'
+		echo 'auto' > '/sys/bus/pci/devices/0000:00:1f.2/power/control'
+		echo 'auto' > '/sys/bus/pci/devices/0000:00:1c.0/power/control'
+		echo 'auto' > '/sys/bus/pci/devices/0000:00:08.0/power/control'
+		echo 'auto' > '/sys/bus/pci/devices/0000:00:14.2/power/control'
+		echo 'auto' > '/sys/bus/pci/devices/0000:04:00.0/power/control'
+		echo 'auto' > '/sys/bus/pci/devices/0000:00:16.3/power/control'
+		echo 'auto' > '/sys/bus/pci/devices/0000:3f:00.0/power/control'
+		echo 'auto' > '/sys/bus/usb/devices/2-3/power/control'
+	else
+		echo "Disabling power tuning"
+                echo '1500' > '/proc/sys/vm/dirty_writeback_centisecs'
+                echo '1' > '/proc/sys/kernel/nmi_watchdog'
+                echo 'on' > '/sys/bus/i2c/devices/i2c-0/device/power/control'
+                echo 'on' > '/sys/bus/pci/devices/0000:00:1f.0/power/control'
+                echo 'on' > '/sys/bus/pci/devices/0000:00:14.0/power/control'
+                echo 'on' > '/sys/bus/pci/devices/0000:00:04.0/power/control'
+                echo 'on' > '/sys/bus/pci/devices/0000:00:1f.6/power/control'
+                echo 'on' > '/sys/bus/pci/devices/0000:40:00.0/power/control'
+                echo 'on' > '/sys/bus/pci/devices/0000:00:00.0/power/control'
+                echo 'on' > '/sys/bus/pci/devices/0000:00:1f.3/power/control'
+                echo 'on' > '/sys/bus/pci/devices/0000:00:1f.2/power/control'
+                echo 'on' > '/sys/bus/pci/devices/0000:00:1c.0/power/control'
+                echo 'on' > '/sys/bus/pci/devices/0000:00:08.0/power/control'
+                echo 'on' > '/sys/bus/pci/devices/0000:00:14.2/power/control'
+                echo 'on' > '/sys/bus/pci/devices/0000:04:00.0/power/control'
+                echo 'on' > '/sys/bus/pci/devices/0000:00:16.3/power/control'
+                echo 'on' > '/sys/bus/pci/devices/0000:3f:00.0/power/control'
+                echo 'on' > '/sys/bus/usb/devices/2-3/power/control'
+	fi
+else
+	echo "$0 error: you need to be root to run this."
+	exit 1
+fi
