@@ -2,6 +2,7 @@
 #
 # Description: Print out summary of detected issues received from Red Hat Insight
 # Prereq: latest version of Red Hat Insight installed on the system and system registered to Satelite or cloud.redhat.com.
+# Licence: GPL 3.0
 #
 # Author: Magnus Glantz, sudo@redhat.com, 2020
 
