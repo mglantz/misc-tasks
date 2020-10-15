@@ -1,4 +1,4 @@
-# Name: check_insight.py
+# Name: check_insights.py
 #
 # Description: Print out summary of detected issues received from Red Hat Insight
 # Prereq: latest version of Red Hat Insight installed on the system and system registered to Satelite or cloud.redhat.com.
