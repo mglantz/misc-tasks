@@ -1,9 +1,6 @@
 # Name: check_insight.py
 #
 # Description: Print out summary of detected issues received from Red Hat Insight
-# Optional: Monitoring mode, control which number of issues will trigger non-zero exits to indicate warning or critical.
-# Tested with Python 3.6.8 running on Red Hat Enterprise Linux 8.2
-#
 # Prereq: latest version of Red Hat Insight installed on the system and system registered to Satelite or cloud.redhat.com.
 #
 # Author: Magnus Glantz, sudo@redhat.com, 2020
@@ -19,13 +16,16 @@ except ImportError:
 import rpm
 import argparse
 
+# We need to discard some info to /dev/null later on
+DEVNULL = open(os.devnull, 'wb')
+
 # Argument parsing and --help
 parser = argparse.ArgumentParser(usage='%(prog)s [options]')
 parser.add_argument('--mon', metavar='true|false', default='false', help='Activating monitoring mode enables all below options - otherwise ignored. Default: false')
-parser.add_argument('--wtotal', metavar='0-999', type=int, default=0, help='Overrides all. Sets warning level, total accumulated issues. Default: 0')
-parser.add_argument('--ctotal', metavar='0-999', type=int, default=0, help='Overrides all. Sets critical level, total accumulated issues. Default: 0')
-parser.add_argument('--wall', metavar='0-999', type=int, default=0, help='Overrides below. Sets same warning level for all types, nr of issues. Default: 0')
-parser.add_argument('--call', metavar='0-999', type=int, default=0, help='Overrides below. Sets same critical level for all types, nr of issues. Default: 0')
+parser.add_argument('--wtotal', metavar='0-999', type=int, default=4, help='Sets warning level for total nr of accumulated issues. Default: 4')
+parser.add_argument('--ctotal', metavar='0-999', type=int, default=12, help='Sets critical level for total nr of accumulated issues. Default: 12')
+parser.add_argument('--wall', metavar='0-999', type=int, default=0, help='Overrides all below. Sets same warning level for all types (but not total), nr of issues. Default: 0')
+parser.add_argument('--call', metavar='0-999', type=int, default=0, help='Overrides all below. Sets same critical level for all types (but not total), nr of issues. Default: 0')
 parser.add_argument('--wstab', metavar='0-999', type=int, default=1, help='Sets warning level for stability issues, nr of issues. Default: 1')
 parser.add_argument('--cstab', metavar='0-999', type=int, default=3, help='Sets critical level for stability issues, nr of issues. Default: 3')
 parser.add_argument('--wavail', metavar='0-999', type=int, default=1, help='Sets warning level for availability issues, nr of issues. Default: 1')
@@ -57,13 +57,6 @@ if mon == "true":
     wtot = args.wtotal
     call = args.call
     wall = args.wall
-
-# Right now, --ctotal and --wtotal both needs to be set, or not at all.
-# Is it wrong to force people to do math? Right now, I seem to think so.
-    if wtot != 0 or ctot != 0:
-        if wtot == 0 or ctot == 0:
-            print('Unknown: You have to set both --ctotal and --wtotal or not at all.')
-            sys.exit(3)
 
 # If --wall is set, set all warning levels to whatever was set
     if wall != 0:
@@ -97,11 +90,15 @@ if rpmhit == 0:
 if not os.path.isfile('/etc/insights-client/.registered'):
     print('Unknown: You need to register to Red Hat Insights by running: insights-client register')
     sys.exit(3)
+
+# Remove .lastupload identifier if it exists
+if os.path.isfile('/etc/insights-client/.lastupload'):
+    os.remove('/etc/insights-client/.lastupload')
         
 try:
-    subprocess.run(['insights-client','--check-result'], check = True)
+    subprocess.run(['insights-client'], check = True, stdout=DEVNULL, stderr=DEVNULL)
 except subprocess.CalledProcessError:
-    print('Unown: insights-client failed to check in. Run: insights-client --check-result for more information.')
+    print('Unknown: insights-client failed to check in. Run: insights-client --check-result for more information.')
     sys.exit(3)
 
 # Remove stdout file
@@ -114,6 +111,10 @@ try:
         raise Exception('insights-client command failed')
 except:
     print('Unknown: insights-client failed to get results. Run: insights-client --show-results for more information.')
+    sys.exit(3)
+
+if not os.path.isfile('/etc/insights-client/.lastupload'):
+    print('Unknown: insights-client failed to get result from cloud.redhat.com. Run: insights-client --show-results for more information.')
     sys.exit(3)
 
 # Open the existing json file for loading into a variable
@@ -149,7 +150,7 @@ for item in datastore:
     if item['rule']['category']['name'] == "Availability":
         availability_issues += 1
 
-print('Total issues:',total_issues,'.','Security issues:', security_issues,'. Availability issues:', availability_issues, '. Stability issues:', stability_issues, '. Performance issues:', performance_issues)
+print('Total issues: ',total_issues,'. Security issues: ', security_issues,'. Availability issues: ', availability_issues, '. Stability issues: ', stability_issues, '. Performance issues: ', performance_issues, sep="")
 
 # We are not in monitoring mode, so let's exit with 0
 if mon == "false" or mon == "False":
@@ -157,20 +158,11 @@ if mon == "false" or mon == "False":
 
 # If monitoring mode has been activated, let's evaluate warning and critical levels and exit accordingly
 if mon == "true" or mon == "True":
-# Evaluate if --*total was used, if so, only evaluate total issues and exit accordingly
-# If below is true, the user passed us arguments
-    if len(sys.argv) > 1:
-        if wtot != 0 and ctot != 0:
-            if total_issues >= ctot:
-                sys.exit(cexit)
-            elif total_issues >= wtot:
-                sys.exit(wexit)
-
 # If something has hit critical levels, we exit with critical exit code
-    if security_issues >= csec or availability_issues >= cavail or stability_issues >= cstab or performance_issues >= cperf:
+    if total_issues >= ctot or security_issues >= csec or availability_issues >= cavail or stability_issues >= cstab or performance_issues >= cperf:
         sys.exit(cexit)
 # If something has hit warning levels, we exit with warning exit code
-    elif security_issues >= wsec or availability_issues >= wavail or stability_issues >= wstab or performance_issues >= wperf:
+    elif total_issues >= wtot or security_issues >= wsec or availability_issues >= wavail or stability_issues >= wstab or performance_issues >= wperf:
         sys.exit(wexit)
 # If we're here, all went OK and we exit with 0
     else:
