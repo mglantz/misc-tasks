@@ -13,7 +13,7 @@ parser = argparse.ArgumentParser(usage='%(prog)s [options]')
 parser.add_argument('--biden', metavar='N', type=int, default=0, help='Number of votes for Biden')
 parser.add_argument('--trump', metavar='N', type=int, default=0, help='Number of votes for Trump')
 parser.add_argument('--reported', metavar='N', type=int, default=0, help='Total votes reported')
-parser.add_argument('--percent', metavar='N', type=int, default=0, help='Percent votes reported')
+parser.add_argument('--percent', metavar='N', type=float, default=0, help='Percent votes reported')
 args = parser.parse_args()
 
 biden = args.biden
@@ -23,6 +23,18 @@ percent = args.percent
 vote_per_percent = (reported / percent)
 total_votes = vote_per_percent * 100
 votes_left = total_votes - reported
+
+biden_trump = biden + trump
+other = reported - biden_trump
+nother = (total_votes - other) / 2
+
+# trump needs
+trump_needs = nother - trump + 1
+trump_needs_per = (trump_needs / votes_left)*100
+
+# biden needs
+biden_needs = nother - biden + 1
+biden_needs_per = (biden_needs / votes_left)*100
 
 print("Biden votes: ", biden)
 print("Trump votes: ", trump)
@@ -38,10 +50,12 @@ if ( biden > trump ):
         print("Trump can still win.")
     else:
         print("Biden won the state.")
+    print("Trump needs % of vote left: ", trump_needs_per)
 
 if ( trump > biden ):
     diff = trump - biden
     print("Trump leads with ", diff, "votes")
+    print("Biden needs % of vote left: ", biden_needs_per)
     if ( votes_left > diff ):
         print("Biden can still win.")
     else:
