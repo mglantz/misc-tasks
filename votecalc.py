@@ -50,6 +50,7 @@ print("Votes left to report: ", votes_left)
 if ( biden > trump ):
     diff = biden - trump
     print("Biden leads with ", diff, "votes")
+    print("Trump needs number of votes: ", trump_needs)
     print("Trump needs % of vote left: ", trump_needs_per)
     if ( votes_left > diff ):
         print("Trump can still win.")
@@ -59,6 +60,7 @@ if ( biden > trump ):
 if ( trump > biden ):
     diff = trump - biden
     print("Trump leads with ", diff, "votes")
+    print("Biden needs number of votes: ", biden_needs)
     print("Biden needs % of vote left: ", biden_needs_per)
     if ( votes_left > diff ):
         print("Biden can still win.")
