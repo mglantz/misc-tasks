@@ -24,6 +24,10 @@ vote_per_percent = (reported / percent)
 total_votes = vote_per_percent * 100
 votes_left = total_votes - reported
 
+# Yes, below is a simplification, as we are not considering that remaining 
+# votes may be cast on other candidates than Biden or Trump. Doing so introduces a moving target which takes us to
+# a realm of math I do not master. Feel free to fix if you math skills are better than mine :-)
+
 biden_trump = biden + trump
 other = reported - biden_trump
 nother = (total_votes - other) / 2
