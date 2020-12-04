@@ -1,0 +1,13 @@
+#!/bin/bash
+# Sparse gcalcli format, only meeting titles
+# Magnus Glantz, sudo@redhat.com, 2020
+
+# In below file, put
+# CLIENTID=
+# CLIENTSECRET=
+# YEAR=
+# FROM=
+# TO=
+
+source ~/.dcal
+gcalcli --client-id=$CLIENTID --client-secret=$CLIENTSECRET --calendar $CALENDAR search "meeting" $FROM $TO --details all|grep "$YEAR-[0-9][0-9]-[0-9][0-9]"|grep "\- [0-9]"
