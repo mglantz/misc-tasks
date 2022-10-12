@@ -1,0 +1,63 @@
+#!/bin/bash
+# By Andrew Block, Red Hat
+ 
+SCRIPT_BASE_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+CONTEXT=context
+EXECUTION_ENVIRONMENT_IMAGE=<MIRRORED_EE_IMAGE>
+ 
+if ! command -v ansible-navigator &> /dev/null
+then
+    echo "ansible-navigator could not be found"
+    exit
+fi
+ 
+if ! command -v podman &> /dev/null
+then
+    echo "podman could not be found"
+    exit
+fi
+ 
+for i in "$@"
+do
+  case $i in
+    -t=* | --tag=* )
+      TAG="${i#*=}"
+      shift
+      ;;
+    -c=* | --context=* )
+      CONTEXT="${i#*=}"
+      shift
+      ;;
+    -eei=* | --execution-environment-image=* )
+      EXECUTION_ENVIRONMENT_IMAGE="${i#*=}"
+      shift
+  esac
+done
+ 
+if [ -z "${TAG}" ]; then
+  echo "ERROR: Tag name must be provided"
+  exit 1
+fi
+ 
+if [[ -z "${NEXUS_HOST}" ]] || [[ -z "${NEXUS_USERNAME}" ]] || [[ -z "${NEXUS_PASSWORD}" ]]; then
+  echo "Error: Environment variables 'NEXUS_HOST', 'NEXUS_USERNAME' and 'NEXUS_PASSWORD' must be provided!"
+  exit 1
+fi
+ 
+ 
+CONTEXT_DIR="${SCRIPT_BASE_DIR}/${CONTEXT}"
+ 
+# Remove Context Directory
+rm -rf "${CONTEXT_DIR}"
+ 
+ansible-navigator builder create --pp=missing --ce=podman --eei=${EXECUTION_ENVIRONMENT_IMAGE} -c "${CONTEXT_DIR}"
+ 
+# Replace contents of pip.conf
+envsubst < "${SCRIPT_BASE_DIR}/pip.conf.template" > "${CONTEXT_DIR}/pip.conf"
+ 
+# Modify contents of Containerfile
+sed -i '/^RUN ansible-builder introspect.*/i ADD pip.conf /etc/pip.conf' "${CONTEXT_DIR}/Containerfile"
+sed -i '/^RUN ansible-builder introspect.*/i RUN rm /etc/yum.repos.d/ubi.repo' "${CONTEXT_DIR}/Containerfile"
+ 
+# Build EE
+podman build -t ${TAG} ${CONTEXT}
