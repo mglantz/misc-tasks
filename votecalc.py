@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-# sudo@redhat.com, 2020
+# sudo@redhat.com, 2024
 # US Presidental election data tool, spits out useful info regarding the presidental vote in a specific state
 
 # Import required modules
