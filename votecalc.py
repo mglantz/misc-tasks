@@ -11,14 +11,14 @@ from datetime import datetime
 
 # Argument parsing and --help
 parser = argparse.ArgumentParser(usage='%(prog)s [options]')
-parser.add_argument('--biden', metavar='N', type=int, default=0, help='Number of votes for Biden')
+parser.add_argument('--Harris', metavar='N', type=int, default=0, help='Number of votes for Harris')
 parser.add_argument('--trump', metavar='N', type=int, default=0, help='Number of votes for Trump')
 parser.add_argument('--reported', metavar='N', type=int, default=0, help='Total votes reported')
 parser.add_argument('--percent', metavar='N', type=float, default=0, help='Percent votes reported')
 parser.add_argument('--roundup', metavar='true|false', default='true', help='Round down to zero')
 args = parser.parse_args()
 
-biden = args.biden
+Harris = args.Harris
 trump = args.trump
 roundup = args.roundup
 reported = args.reported
@@ -31,22 +31,22 @@ dateTimeObj = datetime.now()
 print("Running analysis: ", dateTimeObj)
 
 # Yes, below is a simplification, as we are not considering that remaining 
-# votes may be cast on other candidates than Biden or Trump. Doing so introduces a moving target which takes us to
+# votes may be cast on other candidates than Harris or Trump. Doing so introduces a moving target which takes us to
 # a realm of math I do not master. Feel free to fix if you math skills are better than mine :-)
 
-biden_trump = biden + trump
-other = reported - biden_trump
+Harris_trump = Harris + trump
+other = reported - Harris_trump
 nother = (total_votes - other) / 2
 
 # trump needs
 trump_needs = nother - trump + 1
 trump_needs_per = (trump_needs / votes_left)*100
 
-# biden needs
-biden_needs = nother - biden + 1
-biden_needs_per = (biden_needs / votes_left)*100
+# Harris needs
+Harris_needs = nother - Harris + 1
+Harris_needs_per = (Harris_needs / votes_left)*100
 
-print("Biden votes: ", biden)
+print("Harris votes: ", Harris)
 print("Trump votes: ", trump)
 print("Total votes in: ", reported)
 if ( roundup == "true" ):
@@ -64,9 +64,9 @@ if ( roundup == "true" ):
 else:
     print("Votes left to report: ", votes_left)
 
-if ( biden > trump ):
-    diff = biden - trump
-    print("Biden leads with ", diff, "votes")
+if ( Harris > trump ):
+    diff = Harris - trump
+    print("Harris leads with ", diff, "votes")
     if ( roundup == "true" ):
         print("Trump needs number of votes: ", int(trump_needs))
     else:
@@ -75,17 +75,17 @@ if ( biden > trump ):
     if ( votes_left > diff ):
         print("Trump can still win.")
     else:
-        print("Biden won the state.")
+        print("Harris won the state.")
 
-if ( trump > biden ):
-    diff = trump - biden
+if ( trump > Harris ):
+    diff = trump - Harris
     print("Trump leads with ", diff, "votes")
     if ( roundup == "true" ):
-        print("Biden needs number of votes: ", int(biden_needs))
+        print("Harris needs number of votes: ", int(Harris_needs))
     else:
-        print("Biden needs number of votes: ", biden_needs)
-    print("Biden needs % of vote left: ", biden_needs_per)
+        print("Harris needs number of votes: ", Harris_needs)
+    print("Harris needs % of vote left: ", Harris_needs_per)
     if ( votes_left > diff ):
-        print("Biden can still win.")
+        print("Harris can still win.")
     else:
         print("Trump won the state.")
